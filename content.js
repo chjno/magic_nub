@@ -1,17 +1,17 @@
-chrome.runtime.sendMessage({type: 'getCoords'});
+chrome.runtime.sendMessage({ type: 'getCoords' });
 
 var mouseZ = 0;
-function observe(){
+function observe() {
 
   var observer = new MutationObserver(function (mutations) {
-    try{
+    try {
       document.body.style.overflow = "hidden";
       document.body.style.cursor = 'none';
-    } catch(e){}
+    } catch (e) { }
 
     mutations.forEach(function (mutation) {
-      $(mutation.addedNodes).each(function (){
-        if (this instanceof HTMLElement){
+      $(mutation.addedNodes).each(function () {
+        if (this instanceof HTMLElement) {
           var index = parseInt($(this).css("zIndex"), 10);
           if (index > mouseZ) {
             mouseZ = index + 1;
@@ -33,14 +33,14 @@ function observe(){
 }
 
 observe();
-$(function (){
-  $('body *').each(function (){
-    try{
+$(function () {
+  $('body *').each(function () {
+    try {
       this.style.cursor = 'none';
-    } catch(e){}
-  }).click(function (e){
+    } catch (e) { }
+  }).click(function (e) {
     e.preventDefault();
-  }).hover(function (e){
+  }).hover(function (e) {
     e.preventDefault();
   });
 
@@ -62,8 +62,8 @@ cursorDiv.style.left = $(window).width() / 2 + 'px';
 cursorDiv.style.top = $(window).height() / 2 + 'px';
 cursorDiv.id = 'ps-cursor';
 
-var pointerSrc = chrome.extension.getURL('img/pointer.png');
-var handSrc = chrome.extension.getURL('img/hand.png');
+var pointerSrc = chrome.runtime.getURL('img/pointer.png');
+var handSrc = chrome.runtime.getURL('img/hand.png');
 var pointer = document.createElement('img');
 var hand = document.createElement('img');
 pointer.style.display = 'none';
@@ -76,7 +76,7 @@ cursorDiv.appendChild(hand);
 
 
 var currentEl;
-function underCursor(){
+function underCursor() {
   var pngOffsetX = 7;
   var pngOffsetY = 2;
   var x = $(cursorDiv).offset().left - $(window).scrollLeft() + pngOffsetX;
@@ -87,25 +87,25 @@ function underCursor(){
   var overMenu = false;
   var overA = false;
   var link;
-  for (var i = 0; i < els.length; i++){
-    if (els[i].className == 'ps-menu-item'){
+  for (var i = 0; i < els.length; i++) {
+    if (els[i].className == 'ps-menu-item') {
       overMenu = true;
       currentEl = els[i];
       break;
-    } else if (els[i].tagName == 'A'){
+    } else if (els[i].tagName == 'A') {
       overA = true;
       link = els[i];
     }
   }
 
-  if (overMenu){
+  if (overMenu) {
     cursor('cursor');
     $(currentEl).css({
       'color': 'white',
       'background-color': 'blue'
     });
-    for (var j = 0; j < menuItems.length; j++){
-      if (menuItems[j].id != currentEl.id){
+    for (var j = 0; j < menuItems.length; j++) {
+      if (menuItems[j].id != currentEl.id) {
         $(menuItems[j]).css({
           'color': 'black',
           'background-color': 'lightgray'
@@ -113,13 +113,13 @@ function underCursor(){
       }
     }
   } else {
-    for (var j = 0; j < menuItems.length; j++){
+    for (var j = 0; j < menuItems.length; j++) {
       $(menuItems[j]).css({
         'color': 'black',
         'background-color': 'lightgray'
       });
     }
-    if (overA){
+    if (overA) {
       cursor('hand');
       currentEl = link;
     } else {
@@ -131,8 +131,8 @@ function underCursor(){
   cursorDiv.style.display = 'block';
 }
 
-function cursor(type){
-  if (type == 'hand'){
+function cursor(type) {
+  if (type == 'hand') {
     pointer.style.display = 'none';
     hand.style.display = 'block';
   } else {
@@ -147,15 +147,15 @@ var delts = {
 };
 var moving = false;
 var scrolling = false;
-chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse){
-  if (msg.type == 'unlock'){
+chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+  if (msg.type == 'unlock') {
     moving = false;
     scrolling = false;
 
-  } else if (msg.type == 'click'){
-    if (msg.button == 'l'){
-      if (currentEl.className == 'ps-menu-item'){
-        switch (currentEl.id){
+  } else if (msg.type == 'click') {
+    if (msg.button == 'l') {
+      if (currentEl.className == 'ps-menu-item') {
+        switch (currentEl.id) {
           case 'back':
             window.history.back();
             break;
@@ -170,12 +170,12 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse){
         $(menuDiv).css({
           'visibility': 'hidden'
         });
-        if (currentEl.tagName == 'A'){
-          chrome.runtime.sendMessage({type: 'openLink', url: currentEl.href});
+        if (currentEl.tagName == 'A' && currentEl.href) {
+          chrome.runtime.sendMessage({ type: 'openLink', url: currentEl.href });
         } else {
           currentEl.click();
         }
-        
+
       }
     } else if (msg.button == 'r') {
       var pngOffsetX = 7;
@@ -188,101 +188,94 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse){
         'visibility': 'visible'
       });
     }
-    
-  } else if (msg.type == 'coords'){
 
-    try{
+  } else if (msg.type == 'coords') {
+
+    try {
       cursorDiv.style.left = msg.coords.x + 'px';
       cursorDiv.style.top = msg.coords.y + 'px';
-    } catch(e){}
+    } catch (e) { }
 
-  } else if (msg.type == 'mouse'){
+  } else if (msg.type == 'mouse') {
     delts['x'] = msg.dx;
     delts['y'] = msg.dy;
-    if (!moving){
+    if (!moving) {
       moving = true;
       moveMouse();
     }
 
-  } else if (msg.type == 'scroll'){
+  } else if (msg.type == 'scroll') {
     delts['x'] = msg.dx;
     delts['y'] = msg.dy;
-    if (!scrolling){
+    if (!scrolling) {
       scrolling = true;
       scrollPage();
     }
   }
 });
 
-function moveMouse(){
-    var currentX = parseFloat(cursorDiv.style.left);
-    var currentY = parseFloat(cursorDiv.style.top);
+function moveMouse() {
+  var currentX = parseFloat(cursorDiv.style.left);
+  var currentY = parseFloat(cursorDiv.style.top);
 
-    var newX;
-    var newY;
-    if (delts['x'] < 0){
-      newX = currentX - Math.pow(delts['x'], 2);
-    } else {
-      newX = currentX + Math.pow(delts['x'], 2);
+  var newX;
+  var newY;
+  if (delts['x'] < 0) {
+    newX = currentX - Math.pow(delts['x'], 2);
+  } else {
+    newX = currentX + Math.pow(delts['x'], 2);
+  }
+  if (newX < 0) {
+    newX = 0;
+  } else if (newX > $(window).width()) {
+    newX = $(window).width() - 15;
+  }
+
+  if (delts['y'] < 0) {
+    newY = currentY - Math.pow(delts['y'], 2);
+  } else {
+    newY = currentY + Math.pow(delts['y'], 2);
+  }
+  if (newY < 0) {
+    newY = 0;
+  } else if (newY > $(window).height()) {
+    newY = $(window).height() - 15;
+  }
+
+  cursorDiv.style.left = newX + 'px';
+  cursorDiv.style.top = newY + 'px';
+
+  underCursor();
+
+  chrome.runtime.sendMessage({
+    type: 'coords',
+    coords: {
+      x: newX,
+      y: newY
     }
+  });
 
-    if (delts['y'] < 0){
-      newY = currentY - Math.pow(delts['y'], 2);
-    } else {
-      newY = currentY + Math.pow(delts['y'], 2);
-    }
-
-    var winWidth = $(window).width();
-    var winHeight = $(window).height();
-    var winLeft = $(window).scrollLeft();
-    var winTop = $(window).scrollTop();
-
-    if (currentX > winWidth){
-      newX = winWidth;
-    } else if (currentX < 0){
-      newX = 0;
-    }
-
-    if (currentY > winHeight){
-      newY = winHeight;
-    } else if (currentY < 0){
-      newY = 0;
-    }
-
-    cursorDiv.style.left = newX + 'px';
-    cursorDiv.style.top = newY + 'px';
-
-    underCursor();
-
-    chrome.runtime.sendMessage({
-      type: 'coords',
-      coords: {
-        x: newX,
-        y: newY
-      }
-    });
-
-  if (moving){
+  if (moving) {
     setTimeout(moveMouse, 10);
   }
 }
 
-function scrollPage(){
+function scrollPage() {
   var x = Math.pow(delts['x'], 2);
   var y = Math.pow(delts['y'], 2);
-  if (delts['x'] < 0){
+  if (delts['x'] < 0) {
     x = -x;
   }
-  if (delts['y'] < 0){
+  if (delts['y'] < 0) {
     y = -y;
   }
   scrollBy(x, y);
-  if (scrolling){
+  if (scrolling) {
     setTimeout(scrollPage, 10);
   }
 }
 
-$(window).scroll(function (e){
+$(window).scroll(function (e) {
   underCursor();
 });
 
@@ -315,20 +308,20 @@ backDiv.innerHTML = 'Back';
 forwardDiv.innerHTML = 'Forward';
 reloadDiv.innerHTML = 'Refresh';
 
-$('.ps-menu-item').hover(function (){
+$('.ps-menu-item').hover(function () {
   $(this).css({
     'color': 'white',
     'background-color': 'blue'
   });
-}, function (){
+}, function () {
   $(this).css({
     'color': 'black',
     'background-color': 'lightgray'
   });
 });
 
-$('.ps-menu-item').click(function (){
-  switch (this.id){
+$('.ps-menu-item').click(function () {
+  switch (this.id) {
     case 'back':
       window.history.back();
       break;

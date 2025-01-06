@@ -7,7 +7,7 @@ var scrolling = false;
 var mx;
 var my;
 
-$(window).resize(function() {
+$(window).resize(function () {
   window.resizeTo(300, 322);
 });
 
